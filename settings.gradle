@@ -1,0 +1,2 @@
+include ':demo', ':andlibs'
+rootProject.name='H89AndLib'
