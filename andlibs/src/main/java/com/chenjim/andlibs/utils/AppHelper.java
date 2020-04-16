@@ -45,7 +45,6 @@ public class AppHelper {
         return currentValue;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
     public static boolean isTopApp(Context context, String packageName) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningTaskInfo> tasks = am.getRunningTasks(1);

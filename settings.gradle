@@ -1,2 +1,2 @@
 include ':demo', ':andlibs'
-rootProject.name='H89AndLib'
+rootProject.name = 'AndLibs'

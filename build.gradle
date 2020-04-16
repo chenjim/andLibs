@@ -13,15 +13,16 @@ buildscript {
         }
         maven {
             url 'https://maven.aliyun.com/repository/google'
-        } 
+        }
 
         google()
         jcenter()
-        
+
     }
+
     dependencies {
         classpath 'com.android.tools.build:gradle:3.6.2'
-        
+
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -40,14 +41,23 @@ allprojects {
         }
         maven {
             url 'https://maven.aliyun.com/repository/google'
-        } 
+        }
 
         google()
         jcenter()
-        
+
     }
 }
 
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+ext {
+    minSdkVersion = 16
+    targetSdkVersion = 28
+    androidXVersion = '1.1.0'
+    compileSdkVersion = 28
+    buildToolsVersion = '28.0.3'
+    constraint_version = '1.1.2'
 }

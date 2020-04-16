@@ -57,7 +57,6 @@ public class ActivityHelper {
     }
 
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
     public static boolean isTopActivity(String clzName) {
         ActivityManager am = (ActivityManager) application.getSystemService(Context.ACTIVITY_SERVICE);
         List<RunningTaskInfo> tasks = am.getRunningTasks(1);
@@ -72,7 +71,6 @@ public class ActivityHelper {
 
 
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
     public static String getTopActivity(Context context) {
         ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<RunningTaskInfo> tasksInfo = am.getRunningTasks(1);
