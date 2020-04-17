@@ -137,8 +137,9 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
     @Override
     public void onDetach() {
         super.onDetach();
-        if (viewModel != null && viewModel.isUIAttached())
+        if (viewModel != null && viewModel.isUIAttached()) {
             viewModel.detachUI();
+        }
         Log.d(getFragmentTag(), this + ": " + "onDetach");
     }
 

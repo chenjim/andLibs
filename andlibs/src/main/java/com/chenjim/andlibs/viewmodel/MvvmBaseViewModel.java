@@ -3,7 +3,6 @@ package com.chenjim.andlibs.viewmodel;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModel;
 
-
 import com.chenjim.andlibs.model.SuperBaseModel;
 
 import java.lang.ref.Reference;
@@ -19,6 +18,7 @@ public class MvvmBaseViewModel<V, M extends SuperBaseModel> extends ViewModel im
         mUIRef = new WeakReference<>(ui);
     }
 
+    @Override
     @Nullable
     public V getPageView() {
         if (mUIRef == null) {
@@ -27,10 +27,12 @@ public class MvvmBaseViewModel<V, M extends SuperBaseModel> extends ViewModel im
         return mUIRef.get();
     }
 
+    @Override
     public boolean isUIAttached() {
         return mUIRef != null && mUIRef.get() != null;
     }
 
+    @Override
     public void detachUI() {
         if (mUIRef != null) {
             mUIRef.clear();

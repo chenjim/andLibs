@@ -6,9 +6,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
-
 import com.chenjim.andlibs.utils.EditorUtils;
-import com.chenjim.andlibs.utils.Utils;
 
 import java.util.Map;
 
@@ -19,7 +17,7 @@ abstract class BasePreferences {
     protected SharedPreferences mPreference;
 
     public BasePreferences() {
-        if (Utils.isEmpty(getSPFileName())) {
+        if (TextUtils.isEmpty(getSPFileName())) {
             mPreference = PreferenceManager.getDefaultSharedPreferences(sApplication);
         } else {
             mPreference = sApplication.getSharedPreferences(getSPFileName(), Context.MODE_PRIVATE);

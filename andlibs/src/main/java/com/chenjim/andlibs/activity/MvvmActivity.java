@@ -40,8 +40,9 @@ public abstract class MvvmActivity<V extends ViewDataBinding, VM extends IMvvmBa
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (viewModel != null && viewModel.isUIAttached())
+        if (viewModel != null && viewModel.isUIAttached()) {
             viewModel.detachUI();
+        }
     }
 
     @Override
