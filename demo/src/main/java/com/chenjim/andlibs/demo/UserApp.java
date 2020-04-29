@@ -6,7 +6,7 @@ import com.chenjim.andlibs.loadsir.EmptyCallback;
 import com.chenjim.andlibs.loadsir.ErrorCallback;
 import com.chenjim.andlibs.loadsir.LoadingCallback;
 import com.chenjim.andlibs.loadsir.TimeoutCallback;
-import com.chenjim.andlibs.preference.PreferencesUtil;
+import com.chenjim.andlibs.preference.SPUtil;
 import com.chenjim.andlibs.utils.Logger;
 import com.kingja.loadsir.core.LoadSir;
 
@@ -20,7 +20,7 @@ public class UserApp extends BaseApplication {
     @Override
     public void onCreate() {
         super.onCreate();
-        PreferencesUtil.init(this);
+        SPUtil.init(this);
         //ApiBase.setNetworkRequestInfo(new NetworkRequestInfo());
         setIsDebug(BuildConfig.DEBUG);
         LoadSir.beginBuilder()

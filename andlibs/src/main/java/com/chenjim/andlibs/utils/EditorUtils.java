@@ -4,7 +4,6 @@
 
 package com.chenjim.andlibs.utils;
 
-import android.annotation.TargetApi;
 import android.content.SharedPreferences.Editor;
 import android.os.Build;
 
@@ -14,17 +13,11 @@ public class EditorUtils {
         // edit.apply could not commit your preferences changes in time on
         // Android 4.3
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            GingerbreadCompatLayer.fastCommit(editor);
+            editor.apply();
         } else {
             // FIXME: there's no fast commit below GINGERBREAD.
             editor.commit();
         }
     }
 
-    @TargetApi(9)
-    private static class GingerbreadCompatLayer {
-        public static void fastCommit(final Editor editor) {
-            editor.apply();
-        }
-    }
 }

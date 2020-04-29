@@ -43,4 +43,5 @@ public class MainActivity extends MvvmActivity {
     public int getLayoutId() {
         return R.layout.activity_main;
     }
+
 }

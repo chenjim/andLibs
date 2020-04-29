@@ -9,4 +9,7 @@ public interface IBaseView {
     void onRefreshEmpty();
 
     void onRefreshFailure(String message);
+
+    void onBack();
+
 }

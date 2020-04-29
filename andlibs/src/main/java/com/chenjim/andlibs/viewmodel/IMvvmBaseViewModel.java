@@ -10,4 +10,6 @@ public interface IMvvmBaseViewModel<V> {
     boolean isUIAttached();
 
     void detachUI();
+
+    void onBack();
 }

@@ -3,6 +3,7 @@ package com.chenjim.andlibs.viewmodel;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModel;
 
+import com.chenjim.andlibs.activity.IBaseView;
 import com.chenjim.andlibs.model.SuperBaseModel;
 
 import java.lang.ref.Reference;
@@ -41,6 +42,15 @@ public class MvvmBaseViewModel<V, M extends SuperBaseModel> extends ViewModel im
         }
         if (model != null) {
             model.cancel();
+        }
+    }
+
+    @Override
+    public void onBack() {
+        if (mUIRef != null) {
+            if (mUIRef.get() instanceof IBaseView) {
+                ((IBaseView) mUIRef.get()).onBack();
+            }
         }
     }
 }

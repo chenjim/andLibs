@@ -3,11 +3,15 @@ package com.chenjim.andlibs.activity;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.chenjim.andlibs.loadsir.EmptyCallback;
 import com.chenjim.andlibs.loadsir.ErrorCallback;
@@ -18,7 +22,8 @@ import com.kingja.loadsir.core.LoadService;
 import com.kingja.loadsir.core.LoadSir;
 
 
-public abstract class MvvmActivity<V extends ViewDataBinding, VM extends IMvvmBaseViewModel> extends AppCompatActivity implements IBaseView {
+public abstract class MvvmActivity<V extends ViewDataBinding, VM extends IMvvmBaseViewModel>
+        extends AppCompatActivity implements IBaseView {
     protected VM viewModel;
     private LoadService mLoadService;
     protected V viewDataBinding;
@@ -35,6 +40,11 @@ public abstract class MvvmActivity<V extends ViewDataBinding, VM extends IMvvmBa
         if (viewModel != null) {
             viewModel.attachUI(this);
         }
+    }
+
+    @Override
+    public void onBack() {
+
     }
 
     @Override
@@ -72,6 +82,22 @@ public abstract class MvvmActivity<V extends ViewDataBinding, VM extends IMvvmBa
             mLoadService.showSuccess();
         }
     }
+
+    /**
+     * @param containerViewId
+     * @param fragment
+     * @param addToBackStack
+     */
+    public void fragmentReplace(@IdRes int containerViewId, @NonNull Fragment fragment,
+                                boolean addToBackStack) {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction()
+                .replace(containerViewId, fragment);
+        if (addToBackStack) {
+            transaction.addToBackStack(null);
+        }
+        transaction.commit();
+    }
+
 
     public void setLoadSir(View view) {
         // You can change the callback on sub thread directly.

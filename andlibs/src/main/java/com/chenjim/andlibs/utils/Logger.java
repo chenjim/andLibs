@@ -5,12 +5,22 @@ import android.app.Application;
 import android.text.TextUtils;
 import android.util.Log;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 /**
  * Created by chenjim on 2016/9/26.
@@ -289,7 +299,7 @@ public class Logger {
         Logger.class.notifyAll();
     }
 
-    public static File getDirFile() {
+    public static File getLogDir() {
         String basePath = application.getFilesDir().getAbsolutePath();
         File file = new File(basePath + File.separator + "log");
         if (!file.exists()) {
@@ -300,7 +310,7 @@ public class Logger {
 
     private static RandomAccessFile getRandomAccessFile() {
         if (mLogRandomAccessFile == null) {
-            File file = new File(getDirFile(), curFileName);
+            File file = new File(getLogDir(), curFileName);
             try {
                 if (!file.exists()) {
                     file.createNewFile();
@@ -320,8 +330,8 @@ public class Logger {
             byte[] msgByte = msg.getBytes("UTF-8");
             if (mLogRandomAccessFile != null
                     && mLogRandomAccessFile.length() + msgByte.length > MAX_FILE_LENGTH) {
-                File file1 = new File(getDirFile(), curFileName);
-                File file2 = new File(getDirFile(), curFileName);
+                File file1 = new File(getLogDir(), curFileName);
+                File file2 = new File(getLogDir(), curFileName);
                 file1.renameTo(file2);
                 //重命名后，重新创建文件
                 mLogRandomAccessFile = null;
@@ -340,20 +350,108 @@ public class Logger {
     }
 
     /**
+     * 压缩文件
+     *
+     * @param resFile  需要压缩的文件（夹）
+     * @param zipOut   压缩的目的文件
+     * @param rootPath 压缩的文件路径
+     * @throws FileNotFoundException 找不到文件时抛出
+     * @throws IOException           当压缩过程出错时抛出
+     */
+    private static void zipFile(File resFile, ZipOutputStream zipOut, String rootPath)
+            throws FileNotFoundException, IOException {
+        rootPath = rootPath + (rootPath.trim().length() == 0 ? "" : File.separator)
+                + resFile.getName();
+        rootPath = new String(rootPath.getBytes("8859_1"), "GB2312");
+        if (resFile.isDirectory()) {
+            File[] fileList = resFile.listFiles();
+            for (File file : fileList) {
+                zipFile(file, zipOut, rootPath);
+            }
+        } else {
+            byte buffer[] = new byte[1024];
+            BufferedInputStream in = new BufferedInputStream(new FileInputStream(resFile), 1024);
+            zipOut.putNextEntry(new ZipEntry(rootPath));
+            int realLength;
+            while ((realLength = in.read(buffer)) != -1) {
+                zipOut.write(buffer, 0, realLength);
+            }
+            in.close();
+            zipOut.flush();
+            zipOut.closeEntry();
+        }
+    }
+
+    /**
+     * 批量压缩文件（夹）
+     *
+     * @param resFileList 要压缩的文件（夹）列表
+     * @param zipFile     生成的压缩文件
+     * @param comment     压缩文件的注释
+     * @throws IOException 当压缩过程出错时抛出
+     */
+    public static void zipFiles(Collection<File> resFileList, File zipFile, String comment)
+            throws IOException {
+        ZipOutputStream zipOut = new ZipOutputStream(
+                new BufferedOutputStream(new FileOutputStream(zipFile), 1024));
+        for (File resFile : resFileList) {
+            zipFile(resFile, zipOut, "");
+        }
+        zipOut.setComment(comment);
+        zipOut.close();
+    }
+
+    public static File zipLoggerFiles() {
+        try {
+            File logDir = getLogDir();
+            if (logDir != null && logDir.exists() && logDir.isDirectory()) {
+                File zipFile = new File(application.getFilesDir().getAbsolutePath() + File.separator + "log.zip");
+                if (zipFile.exists()) {
+                    zipFile.delete();
+                }
+                ArrayList<File> files = new ArrayList<>();
+
+                File firstLogFile = new File(logDir.getAbsolutePath() + File.separator + curFileName);
+                if (firstLogFile.exists()) {
+                    files.add(firstLogFile);
+                }
+
+                File secondLogFile = new File(logDir.getAbsolutePath() + File.separator + lastFileName);
+                if (secondLogFile.exists()) {
+                    files.add(secondLogFile);
+                }
+
+                String spFilePath = application.getFilesDir().getParent() + "/shared_prefs/common_data.xml";
+                File spFile = new File(spFilePath);
+                if (spFile != null && spFile.exists()) {
+                    files.add(spFile);
+//                    d("add spFile file to zipfile list");
+                }
+
+                zipFiles(files, zipFile, "");
+                return zipFile;
+            }
+        } catch (Exception e) {
+            Log.d("zipFile error:", e.getMessage());
+        }
+        return null;
+    }
+
+    /**
      * 读取最后一段logger
      */
     public static String getLastLogger(long maxSize) {
         StringBuffer data = new StringBuffer();
         RandomAccessFile curAccessFile = null, lastAccessFile = null;
         try {
-            File curLogFile = new File(getDirFile() + File.separator + curFileName);
+            File curLogFile = new File(getLogDir() + File.separator + curFileName);
             if (!curLogFile.exists()) {
                 return data.toString();
             }
             curAccessFile = new RandomAccessFile(curLogFile, "rw");
             //是否需要读取上一个文件
             if (curAccessFile.length() < maxSize) {
-                File lastLogFile = new File(getDirFile() + File.separator + lastFileName);
+                File lastLogFile = new File(getLogDir() + File.separator + lastFileName);
                 if (lastLogFile.exists()) {
                     long lastFileReadSize = maxSize - curAccessFile.length();
                     lastAccessFile = new RandomAccessFile(lastLogFile, "rw");

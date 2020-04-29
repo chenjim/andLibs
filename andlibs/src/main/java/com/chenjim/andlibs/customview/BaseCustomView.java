@@ -1,11 +1,13 @@
 package com.chenjim.andlibs.customview;
 
 import android.content.Context;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 
+import androidx.annotation.RequiresApi;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 
@@ -30,11 +32,13 @@ public abstract class BaseCustomView<T extends ViewDataBinding, S extends BaseCu
         init();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public BaseCustomView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
 
+    @Override
     public View getRootView() {
         return dataBinding.getRoot();
     }
@@ -42,8 +46,8 @@ public abstract class BaseCustomView<T extends ViewDataBinding, S extends BaseCu
     public void init() {
 
         LayoutInflater inflater = (LayoutInflater) this.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (setViewLayoutId() != 0) {
-            dataBinding = DataBindingUtil.inflate(inflater, setViewLayoutId(), this, false);
+        if (getViewLayoutId() != 0) {
+            dataBinding = DataBindingUtil.inflate(inflater, getViewLayoutId(), this, false);
             dataBinding.getRoot().setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -92,7 +96,7 @@ public abstract class BaseCustomView<T extends ViewDataBinding, S extends BaseCu
     }
 
 
-    protected abstract int setViewLayoutId();
+    protected abstract int getViewLayoutId();
 
     protected abstract void setDataToView(S data);
 

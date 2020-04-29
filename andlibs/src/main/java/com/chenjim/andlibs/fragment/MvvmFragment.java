@@ -2,22 +2,25 @@ package com.chenjim.andlibs.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.chenjim.andlibs.R;
 import com.chenjim.andlibs.loadsir.EmptyCallback;
 import com.chenjim.andlibs.loadsir.ErrorCallback;
 import com.chenjim.andlibs.loadsir.LoadingCallback;
+import com.chenjim.andlibs.utils.Logger;
 import com.chenjim.andlibs.utils.ToastUtil;
 import com.chenjim.andlibs.viewmodel.IMvvmBaseViewModel;
 import com.kingja.loadsir.callback.Callback;
@@ -25,7 +28,8 @@ import com.kingja.loadsir.core.LoadService;
 import com.kingja.loadsir.core.LoadSir;
 
 
-public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBaseViewModel> extends Fragment implements IBasePagingView {
+public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBaseViewModel>
+        extends Fragment implements IBasePagingView {
     protected VM viewModel;
     protected V viewDataBinding;
     protected String mFragmentTag = "";
@@ -62,12 +66,48 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
             viewDataBinding.setVariable(getBindingVariable(), viewModel);
             viewDataBinding.executePendingBindings();
         }
+
+        initView();
+
     }
+
+
+    public void initView() {
+
+    }
+
+    /**
+     * @param containerViewId
+     * @param fragment
+     * @param addToBackStack
+     */
+    public void fragmentReplace(@IdRes int containerViewId, @NonNull Fragment fragment,
+                                boolean addToBackStack) {
+        if (getActivity() == null) {
+            return;
+        }
+        FragmentManager manager = getActivity().getSupportFragmentManager();
+
+        FragmentTransaction transaction = manager
+                .beginTransaction()
+                .replace(containerViewId, fragment, getFragmentTag());
+        if (addToBackStack) {
+            transaction.addToBackStack(getFragmentTag());
+        }
+        transaction.commit();
+    }
+
 
     /***
      *   初始化参数
      */
     protected void initParameters() {
+
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
     }
 
     @Override
@@ -88,7 +128,7 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
             if (!isShowedContent) {
                 mLoadService.showCallback(ErrorCallback.class);
             } else {
-                ToastUtil.show(getContext(), message);
+                ToastUtil.showShort(message);
             }
         }
     }
@@ -110,28 +150,30 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
         }
     }
 
-    protected abstract void onRetryBtnClick();
+    public void onRetryBtnClick() {
+
+    }
 
     @Override
     public void onLoadMoreFailure(String message) {
-        ToastUtil.show(getContext(), message);
+        ToastUtil.showShort(getContext(), message);
     }
 
     @Override
     public void onLoadMoreEmpty() {
-        ToastUtil.show(getContext(), getString(R.string.no_more_data));
+        ToastUtil.showShort(getContext(), getString(R.string.no_more_data));
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(getFragmentTag(), this + ": " + "onActivityCreated");
+        Logger.d(getFragmentTag(), "onActivityCreated");
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(getContext());
-        Log.d(getFragmentTag(), this + ": " + "onAttach");
+        Logger.d(getFragmentTag(), "onAttach");
     }
 
     @Override
@@ -140,30 +182,30 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
         if (viewModel != null && viewModel.isUIAttached()) {
             viewModel.detachUI();
         }
-        Log.d(getFragmentTag(), this + ": " + "onDetach");
+        Logger.d(getFragmentTag(), "onDetach");
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        Log.d(getFragmentTag(), this + ": " + "onStop");
+        Logger.d(getFragmentTag(), "onStop");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(getFragmentTag(), this + ": " + "onPause");
+        Logger.d(getFragmentTag(), "onPause");
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(getFragmentTag(), this + ": " + "onResume");
+        Logger.d(getFragmentTag(), "onResume");
     }
 
     @Override
     public void onDestroy() {
-        Log.d(getFragmentTag(), this + ": " + "onDestroy");
+        Logger.d(getFragmentTag(), "onDestroy");
         super.onDestroy();
     }
 
@@ -177,5 +219,15 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
         });
     }
 
-    protected abstract String getFragmentTag();
+    @Override
+    public void onBack() {
+        if (getActivity() != null) {
+            FragmentManager manager = getActivity().getSupportFragmentManager();
+            if (manager.getBackStackEntryCount() > 0) {
+                manager.popBackStack();
+            }
+        }
+    }
+
+    public abstract String getFragmentTag();
 }

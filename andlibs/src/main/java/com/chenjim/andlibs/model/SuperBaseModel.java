@@ -7,7 +7,7 @@ import android.text.TextUtils;
 import androidx.annotation.CallSuper;
 
 
-import com.chenjim.andlibs.preference.BasicDataPreferenceUtil;
+import com.chenjim.andlibs.preference.SPNetDataUtil;
 import com.chenjim.andlibs.utils.GsonUtils;
 
 import org.json.JSONException;
@@ -97,7 +97,7 @@ public abstract class SuperBaseModel<T> {
     protected void saveDataToPreference(T data) {
         mData.data = data;
         mData.updateTimeInMills = System.currentTimeMillis();
-        BasicDataPreferenceUtil.getInstance().setString(getCachedPreferenceKey(), GsonUtils.toJson(mData));
+        SPNetDataUtil.getInstance().setString(getCachedPreferenceKey(), GsonUtils.toJson(mData));
     }
 
     public abstract void refresh();
@@ -161,7 +161,7 @@ public abstract class SuperBaseModel<T> {
 
     public void getCachedDataAndLoad() {
         if (getCachedPreferenceKey() != null) {
-            String saveDataString = BasicDataPreferenceUtil.getInstance().getString(getCachedPreferenceKey());
+            String saveDataString = SPNetDataUtil.getInstance().getString(getCachedPreferenceKey());
             if (!TextUtils.isEmpty(saveDataString)) {
                 try {
                     T savedData = GsonUtils.fromLocalJson(new JSONObject(saveDataString).getString("data"), getTClass());

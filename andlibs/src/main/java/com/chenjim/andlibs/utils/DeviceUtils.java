@@ -2,7 +2,12 @@ package com.chenjim.andlibs.utils;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.BatteryManager;
+import android.os.Build;
 import android.util.Log;
+
+import com.chenjim.andlibs.BaseApplication;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -125,6 +130,17 @@ public class DeviceUtils {
             CpuTemperature = (float) temperatureMap.get("mtktscpu");
         }
         return CpuTemperature;
+    }
+
+    public static int getBatteryLevel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            BatteryManager batteryManager = (BatteryManager) BaseApplication.sApplication.getSystemService(Context.BATTERY_SERVICE);
+            return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+        } else {
+            Intent intent = BaseApplication.sApplication.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            return (intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) * 100) /
+                    intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+        }
     }
 
 }
