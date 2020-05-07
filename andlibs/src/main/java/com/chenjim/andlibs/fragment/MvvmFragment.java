@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import com.blankj.utilcode.util.BusUtils;
 import com.chenjim.andlibs.R;
 import com.chenjim.andlibs.loadsir.EmptyCallback;
 import com.chenjim.andlibs.loadsir.ErrorCallback;
@@ -23,6 +24,7 @@ import com.chenjim.andlibs.loadsir.LoadingCallback;
 import com.chenjim.andlibs.utils.Logger;
 import com.chenjim.andlibs.utils.ToastUtil;
 import com.chenjim.andlibs.viewmodel.IMvvmBaseViewModel;
+import com.chenjim.andlibs.views.LoadingDialog;
 import com.kingja.loadsir.callback.Callback;
 import com.kingja.loadsir.core.LoadService;
 import com.kingja.loadsir.core.LoadSir;
@@ -34,6 +36,7 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
     protected V viewDataBinding;
     protected String mFragmentTag = "";
     private LoadService mLoadService;
+    protected LoadingDialog loadingDialog;
 
     public abstract int getBindingVariable();
 
@@ -67,8 +70,11 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
             viewDataBinding.executePendingBindings();
         }
 
-        initView();
+        loadingDialog = new LoadingDialog(getActivity());
 
+        BusUtils.register(this);
+
+        initView();
     }
 
 
@@ -112,6 +118,7 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
 
     @Override
     public void onDestroyView() {
+        BusUtils.unregister(this);
         super.onDestroyView();
     }
 
@@ -205,6 +212,7 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
 
     @Override
     public void onDestroy() {
+        loadingDialog.dismiss();
         Logger.d(getFragmentTag(), "onDestroy");
         super.onDestroy();
     }
