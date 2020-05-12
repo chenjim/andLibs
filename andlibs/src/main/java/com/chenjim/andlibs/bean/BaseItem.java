@@ -1,4 +1,4 @@
-package com.chenjim.andlibs;
+package com.chenjim.andlibs.bean;
 
 import java.io.Serializable;
 

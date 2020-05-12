@@ -26,7 +26,7 @@ public class ToastUtil {
     private static void showUi(Context context, String msg, int duration) {
         try {
             if (context == null) {
-                context = BaseApplication.sApplication;
+                context = BaseApplication.sApp;
             }
             if (!TextUtils.isEmpty(msg)) {
                 if (mToast != null) {
@@ -58,18 +58,18 @@ public class ToastUtil {
     }
 
     public static void showShort(String msg) {
-        show(BaseApplication.sApplication, msg, Toast.LENGTH_SHORT);
+        show(BaseApplication.sApp, msg, Toast.LENGTH_SHORT);
     }
 
     public static void showShort(int resource) {
-        show(BaseApplication.sApplication, BaseApplication.sApplication.getString(resource), Toast.LENGTH_SHORT);
+        show(BaseApplication.sApp, BaseApplication.sApp.getString(resource), Toast.LENGTH_SHORT);
     }
 
     public static void showLong(String msg) {
-        show(BaseApplication.sApplication, msg, Toast.LENGTH_LONG);
+        show(BaseApplication.sApp, msg, Toast.LENGTH_LONG);
     }
 
     public static void showLong(int resource) {
-        show(BaseApplication.sApplication, BaseApplication.sApplication.getString(resource), Toast.LENGTH_LONG);
+        show(BaseApplication.sApp, BaseApplication.sApp.getString(resource), Toast.LENGTH_LONG);
     }
 }

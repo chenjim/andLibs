@@ -26,16 +26,15 @@ public class MainViewModel extends MvvmBaseViewModel<MainViewModel.IPageView, Ma
     }
 
     @Override
-    public void responseSuccess(BaseModel model, DataResponse data) {
+    public void loadSuccess(BaseModel model, DataResponse data) {
         Logger.d(data);
         getPageView().requestResponse(data);
     }
 
     @Override
-    public void responseFail(BaseModel model, String prompt) {
+    public void loadFail(BaseModel model, String prompt) {
         Logger.d(prompt);
     }
-
 
     public interface IPageView extends IBaseView {
         void doAction();

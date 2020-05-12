@@ -62,6 +62,7 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = getViewModel();
+
         if (viewModel != null) {
             viewModel.attachUI(this);
         }

@@ -9,7 +9,7 @@ import java.util.List;
 
 public class BaseApplication extends Application {
 
-    public static BaseApplication sApplication;
+    public static BaseApplication sApp;
     public static boolean sIsDebug;
 
     public static void setIsDebug(boolean isDebug) {
@@ -19,7 +19,7 @@ public class BaseApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        sApplication = this;
+        sApp = this;
     }
 
     /**

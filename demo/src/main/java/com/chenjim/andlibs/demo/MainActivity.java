@@ -37,17 +37,12 @@ public class MainActivity extends MvvmActivity<ActivityMainBindingImpl, MainView
 
     @Override
     public int getBindingVariable() {
-        return 1;
+        return BR.viewModel;
     }
 
     @Override
     public int getLayoutId() {
         return R.layout.activity_main;
-    }
-
-    @Override
-    public void onBack() {
-
     }
 
     @Override
@@ -59,4 +54,5 @@ public class MainActivity extends MvvmActivity<ActivityMainBindingImpl, MainView
     public void requestResponse(DataResponse data) {
         Logger.d(data);
     }
+
 }

@@ -16,7 +16,7 @@ public abstract class BaseModel<T> extends SuperBaseModel<T> {
                     if (weakListener.get() instanceof IModelListener) {
                         IModelListener listenerItem = (IModelListener) weakListener.get();
                         if (listenerItem != null) {
-                            listenerItem.responseSuccess(BaseModel.this, data);
+                            listenerItem.loadSuccess(BaseModel.this, data);
                         }
                     }
                 }
@@ -39,7 +39,7 @@ public abstract class BaseModel<T> extends SuperBaseModel<T> {
                     if (weakListener.get() instanceof IModelListener) {
                         IModelListener listenerItem = (IModelListener) weakListener.get();
                         if (listenerItem != null) {
-                            listenerItem.responseFail(BaseModel.this, prompt);
+                            listenerItem.loadFail(BaseModel.this, prompt);
                         }
                     }
                 }
@@ -53,8 +53,8 @@ public abstract class BaseModel<T> extends SuperBaseModel<T> {
     }
 
     public interface IModelListener<T> extends SuperBaseModel.IBaseModelListener {
-        void responseSuccess(BaseModel model, T data);
+        void loadSuccess(BaseModel model, T data);
 
-        void responseFail(BaseModel model, String prompt);
+        void loadFail(BaseModel model, String prompt);
     }
 }

@@ -134,10 +134,10 @@ public class DeviceUtils {
 
     public static int getBatteryLevel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            BatteryManager batteryManager = (BatteryManager) BaseApplication.sApplication.getSystemService(Context.BATTERY_SERVICE);
+            BatteryManager batteryManager = (BatteryManager) BaseApplication.sApp.getSystemService(Context.BATTERY_SERVICE);
             return batteryManager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
         } else {
-            Intent intent = BaseApplication.sApplication.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+            Intent intent = BaseApplication.sApp.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
             return (intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) * 100) /
                     intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
         }

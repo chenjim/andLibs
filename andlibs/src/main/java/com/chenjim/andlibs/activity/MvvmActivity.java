@@ -125,4 +125,9 @@ public abstract class MvvmActivity<V extends ViewDataBinding, VM extends IMvvmBa
         }
         viewDataBinding.executePendingBindings();
     }
+
+    @Override
+    public void onBack() {
+        onBackPressed();
+    }
 }
