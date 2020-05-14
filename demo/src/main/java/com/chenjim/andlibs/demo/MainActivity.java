@@ -1,8 +1,6 @@
 package com.chenjim.andlibs.demo;
 
-import android.os.Bundle;
-
-import androidx.annotation.Nullable;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.chenjim.andlibs.activity.MvvmActivity;
 import com.chenjim.andlibs.demo.databinding.ActivityMainBindingImpl;
@@ -15,10 +13,6 @@ import com.chenjim.andlibs.utils.Logger;
 public class MainActivity extends MvvmActivity<ActivityMainBindingImpl, MainViewModel>
         implements MainViewModel.IPageView {
 
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
 
     @Override
     protected void onResume() {
@@ -32,7 +26,9 @@ public class MainActivity extends MvvmActivity<ActivityMainBindingImpl, MainView
 
     @Override
     protected MainViewModel getViewModel() {
-        return new MainViewModel();
+        return new ViewModelProvider.AndroidViewModelFactory(getApplication())
+                .create(MainViewModel.class);
+//        return new MainViewModel(getApplication());
     }
 
     @Override

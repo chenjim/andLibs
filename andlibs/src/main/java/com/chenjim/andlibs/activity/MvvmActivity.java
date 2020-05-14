@@ -119,10 +119,12 @@ public abstract class MvvmActivity<V extends ViewDataBinding, VM extends IMvvmBa
 
     private void performDataBinding() {
         viewDataBinding = DataBindingUtil.setContentView(this, getLayoutId());
-        this.viewModel = viewModel == null ? getViewModel() : viewModel;
         if (getBindingVariable() > 0) {
             viewDataBinding.setVariable(getBindingVariable(), viewModel);
         }
+
+        viewDataBinding.setLifecycleOwner(this);
+
         viewDataBinding.executePendingBindings();
     }
 

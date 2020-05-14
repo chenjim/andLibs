@@ -71,6 +71,8 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
             viewDataBinding.executePendingBindings();
         }
 
+        viewDataBinding.setLifecycleOwner(this);
+
         loadingDialog = new LoadingDialog(getActivity());
 
         BusUtils.register(this);
