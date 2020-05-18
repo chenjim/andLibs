@@ -3,16 +3,19 @@ package com.chenjim.andlibs.utils;
 import android.graphics.Bitmap;
 
 import com.blankj.utilcode.util.ConvertUtils;
+import com.chenjim.andlibs.BaseApplication;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -209,6 +212,25 @@ public class FileUtils {
 
     public static String getFileMD5Sting(final File file) {
         return ConvertUtils.bytes2String(getFileMD5(file));
+    }
+
+
+    public static String readAssets(String path) {
+        String ret = "";
+        try {
+            InputStream is = BaseApplication.sApp.getAssets().open(path);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            int len = -1;
+            byte[] buffer = new byte[1024];
+            while ((len = is.read(buffer)) != -1) {
+                baos.write(buffer, 0, len);
+            }
+            ret = baos.toString();
+            is.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ret;
     }
 
 }

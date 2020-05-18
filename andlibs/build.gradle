@@ -1,6 +1,6 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion rootProject.compileSdkVersion
@@ -55,7 +55,10 @@ dependencies {
     api 'io.reactivex.rxjava2:rxjava:2.2.19'
     api 'io.reactivex.rxjava2:rxandroid:2.1.1'
     api "androidx.recyclerview:recyclerview:$rootProject.androidXVersion"
-    implementation "androidx.core:core-ktx:+"
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    api "androidx.core:core-ktx:+"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    //mmkv 数据存储
+    api 'com.tencent:mmkv-static:1.1.1'
 }
 

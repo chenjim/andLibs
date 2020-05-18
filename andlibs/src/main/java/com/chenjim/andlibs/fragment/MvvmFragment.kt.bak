@@ -1,0 +1,188 @@
+package com.chenjim.andlibs.fragment
+
+import android.content.Context
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.annotation.IdRes
+import androidx.annotation.LayoutRes
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
+import androidx.fragment.app.Fragment
+import com.blankj.utilcode.util.BusUtils
+import com.chenjim.andlibs.R
+import com.chenjim.andlibs.loadsir.EmptyCallback
+import com.chenjim.andlibs.loadsir.ErrorCallback
+import com.chenjim.andlibs.loadsir.LoadingCallback
+import com.chenjim.andlibs.utils.Logger
+import com.chenjim.andlibs.utils.ToastUtil
+import com.chenjim.andlibs.viewmodel.IMvvmBaseViewModel
+import com.chenjim.andlibs.views.LoadingDialog
+import com.kingja.loadsir.core.LoadService
+import com.kingja.loadsir.core.LoadSir
+
+abstract class MvvmFragment<V : ViewDataBinding?, VM : IMvvmBaseViewModel<*>?> : Fragment(), IBasePagingView {
+    protected var viewModel: VM? = null
+    protected var viewDataBinding: V? = null
+    protected var mFragmentTag = ""
+    private var mLoadService: LoadService<*>? = null
+    protected var loadingDialog: LoadingDialog? = null
+    abstract val bindingVariable: Int
+
+    @get:LayoutRes
+    abstract val layoutId: Int
+    abstract fun getViewModel(): VM
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        initParameters()
+    }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        viewDataBinding = DataBindingUtil.inflate(inflater, layoutId, container, false)
+        return viewDataBinding?.getRoot()
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        viewModel = getViewModel()
+        viewModel?.attachUI(this)
+        if (bindingVariable > 0) {
+            viewDataBinding!!.setVariable(bindingVariable, viewModel)
+            viewDataBinding!!.executePendingBindings()
+        }
+        viewDataBinding!!.lifecycleOwner = this
+        loadingDialog = LoadingDialog(activity)
+        BusUtils.register(this)
+        initView()
+    }
+
+    fun initView() {}
+
+    /**
+     * @param containerViewId
+     * @param fragment
+     * @param addToBackStack
+     */
+    fun fragmentReplace(@IdRes containerViewId: Int, fragment: Fragment,
+                        addToBackStack: Boolean) {
+        if (activity == null) {
+            return
+        }
+        val manager = requireActivity().supportFragmentManager
+        val transaction = manager
+                .beginTransaction()
+                .replace(containerViewId, fragment, fragmentTag)
+        if (addToBackStack) {
+            transaction.addToBackStack(fragmentTag)
+        }
+        transaction.commit()
+    }
+
+    /***
+     * 初始化参数
+     */
+    protected fun initParameters() {}
+    override fun onStart() {
+        super.onStart()
+    }
+
+    override fun onDestroyView() {
+        BusUtils.unregister(this)
+        super.onDestroyView()
+    }
+
+    override fun onRefreshEmpty() {
+        if (mLoadService != null) {
+            mLoadService.showCallback(EmptyCallback::class.java)
+        }
+    }
+
+    override fun onRefreshFailure(message: String?) {
+        if (mLoadService != null) {
+            if (!isShowedContent) {
+                mLoadService.showCallback(ErrorCallback::class.java)
+            } else {
+                ToastUtil.showShort(message)
+            }
+        }
+    }
+
+    override fun showLoading() {
+        if (mLoadService != null) {
+            mLoadService.showCallback(LoadingCallback::class.java)
+        }
+    }
+
+    private var isShowedContent = false
+    override fun showContent() {
+        if (mLoadService != null) {
+            isShowedContent = true
+            mLoadService.showSuccess()
+        }
+    }
+
+    fun onRetryBtnClick() {}
+    override fun onLoadMoreFailure(message: String?) {
+        ToastUtil.showShort(context, message)
+    }
+
+    override fun onLoadMoreEmpty() {
+        ToastUtil.showShort(context, getString(R.string.no_more_data))
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        Logger.d(fragmentTag, "onActivityCreated")
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        Logger.d(fragmentTag, "onAttach")
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        if (viewModel != null && viewModel!!.isUIAttached()) {
+            viewModel!!.detachUI()
+        }
+        Logger.d(fragmentTag, "onDetach")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Logger.d(fragmentTag, "onStop")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Logger.d(fragmentTag, "onPause")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Logger.d(fragmentTag, "onResume")
+    }
+
+    override fun onDestroy() {
+        loadingDialog!!.dismiss()
+        Logger.d(fragmentTag, "onDestroy")
+        super.onDestroy()
+    }
+
+    fun setLoadSir(view: View?) {
+        // You can change the callback on sub thread directly.
+        mLoadService = LoadSir.getDefault().register(view) { onRetryBtnClick() }
+    }
+
+    override fun onBack() {
+        if (activity != null) {
+            val manager = requireActivity().supportFragmentManager
+            if (manager.backStackEntryCount > 0) {
+                manager.popBackStack()
+            }
+        }
+    }
+
+    abstract val fragmentTag: String?
+}

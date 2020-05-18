@@ -6,9 +6,8 @@ import android.text.TextUtils;
 
 import androidx.annotation.CallSuper;
 
-
 import com.chenjim.andlibs.preference.SPNetDataUtil;
-import com.chenjim.andlibs.utils.GsonUtils;
+import com.chenjim.andlibs.utils.JsonHelper;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -97,7 +96,7 @@ public abstract class SuperBaseModel<T> {
     protected void saveDataToPreference(T data) {
         mData.data = data;
         mData.updateTimeInMills = System.currentTimeMillis();
-        SPNetDataUtil.getInstance().setString(getCachedPreferenceKey(), GsonUtils.toJson(mData));
+        SPNetDataUtil.getInstance().setString(getCachedPreferenceKey(), JsonHelper.toJson(mData));
     }
 
     public abstract void refresh();
@@ -164,7 +163,7 @@ public abstract class SuperBaseModel<T> {
             String saveDataString = SPNetDataUtil.getInstance().getString(getCachedPreferenceKey());
             if (!TextUtils.isEmpty(saveDataString)) {
                 try {
-                    T savedData = GsonUtils.fromLocalJson(new JSONObject(saveDataString).getString("data"), getTClass());
+                    T savedData = JsonHelper.parse(new JSONObject(saveDataString).getString("data"), getTClass());
                     if (savedData != null) {
                         notifyCachedData(savedData);
                         if (isNeedToUpdate()) {
@@ -178,7 +177,7 @@ public abstract class SuperBaseModel<T> {
             }
 
             if (getApkString() != null) {
-                notifyCachedData(GsonUtils.fromLocalJson(getApkString(), getTClass()));
+                notifyCachedData(JsonHelper.parse(getApkString(), getTClass()));
             }
         }
         load();

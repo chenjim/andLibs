@@ -1,6 +1,9 @@
 package com.chenjim.andlibs.preference;
 
-
+/**
+ * replace with {@link com.tencent.mmkv.MMKV}  {@link com.chenjim.andlibs.mmkv.DataMap}
+ */
+@Deprecated
 public class SPNetDataUtil extends BasePreferences {
     private static final String BASIC_DATA_PREFERENCE_FILE_NAME = "network_api_module_basic_data_preference";
     private static SPNetDataUtil sInstance;

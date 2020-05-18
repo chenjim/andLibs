@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.chenjim.andlibs.demo.TitleViewModel" />
+
+    </data>
+
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/title_tv"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@color/theme_blue"
+            android:gravity="center"
+            android:text="@{viewModel.title, default=@string/app_name}"
+            android:textSize="30sp" />
+
+        <TextView
+            android:id="@+id/title_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@color/theme_blue_dark"
+            android:onClick="@{()->viewModel.onBackClick()}"
+            android:padding="6dp"
+            android:text="Back" />
+
+        <TextView
+            android:id="@+id/title_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:background="@color/theme_blue_dark"
+            android:padding="6dp"
+            android:text="Rigt" />
+
+    </FrameLayout>
+
+</layout>

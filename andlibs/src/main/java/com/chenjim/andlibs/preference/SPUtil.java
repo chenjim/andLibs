@@ -1,10 +1,11 @@
 package com.chenjim.andlibs.preference;
 
 import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
 
-
+/**
+ * replace with {@link com.tencent.mmkv.MMKV}  {@link com.chenjim.andlibs.mmkv.DataMap}
+ */
+@Deprecated
 public class SPUtil extends BasePreferences {
 
     private static SPUtil sInstance;

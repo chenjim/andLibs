@@ -10,7 +10,10 @@ import com.chenjim.andlibs.utils.EditorUtils;
 
 import java.util.Map;
 
-
+/**
+ * replace with {@link com.tencent.mmkv.MMKV}  {@link com.chenjim.andlibs.mmkv.DataMap}
+ */
+@Deprecated
 abstract class BasePreferences {
     protected static Application sApplication;
 

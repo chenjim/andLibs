@@ -35,10 +35,15 @@ public abstract class MvvmActivity<V extends ViewDataBinding, VM extends IMvvmBa
         initViewModel();
         performDataBinding();
         BusUtils.register(this);
+        initView();
+    }
+
+    public void initView() {
+
     }
 
     private void initViewModel() {
-        viewModel = getViewModel();
+        viewModel = createViewModel();
         if (viewModel != null) {
             viewModel.attachUI(this);
         }
@@ -109,7 +114,7 @@ public abstract class MvvmActivity<V extends ViewDataBinding, VM extends IMvvmBa
 
     protected abstract void onRetryBtnClick();
 
-    protected abstract VM getViewModel();
+    protected abstract VM createViewModel();
 
     public abstract int getBindingVariable();
 
