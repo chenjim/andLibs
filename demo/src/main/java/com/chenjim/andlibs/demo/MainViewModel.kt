@@ -53,7 +53,7 @@ class MainViewModel(application: Application) : MvvmBaseViewModel<IPageView?, Ma
     init {
         model = MainModel()
         model!!.register(this)
-        Logger.d(this)
+        Logger.d()
     }
 
 }

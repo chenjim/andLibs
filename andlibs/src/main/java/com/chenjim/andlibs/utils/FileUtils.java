@@ -2,7 +2,6 @@ package com.chenjim.andlibs.utils;
 
 import android.graphics.Bitmap;
 
-import com.blankj.utilcode.util.ConvertUtils;
 import com.chenjim.andlibs.BaseApplication;
 
 import java.io.BufferedInputStream;
@@ -16,6 +15,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -211,7 +211,12 @@ public class FileUtils {
     }
 
     public static String getFileMD5Sting(final File file) {
-        return ConvertUtils.bytes2String(getFileMD5(file));
+        try {
+            return new String(getFileMD5(file), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return new String(getFileMD5(file));
     }
 
 

@@ -16,7 +16,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.6.3'
+        classpath 'com.android.tools.build:gradle:4.1.0'
 
         //https://github.com/Blankj/AndroidUtilCode/tree/master/plugin/bus-gradle-plugin
         //classpath 'com.blankj:bus-gradle-plugin:2.4'

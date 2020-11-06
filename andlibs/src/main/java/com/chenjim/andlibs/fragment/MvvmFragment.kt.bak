@@ -10,7 +10,6 @@ import androidx.annotation.LayoutRes
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
 import androidx.fragment.app.Fragment
-import com.blankj.utilcode.util.BusUtils
 import com.chenjim.andlibs.R
 import com.chenjim.andlibs.loadsir.EmptyCallback
 import com.chenjim.andlibs.loadsir.ErrorCallback
@@ -53,7 +52,6 @@ abstract class MvvmFragment<V : ViewDataBinding?, VM : IMvvmBaseViewModel<*>?> :
         }
         viewDataBinding!!.lifecycleOwner = this
         loadingDialog = LoadingDialog(activity)
-        BusUtils.register(this)
         initView()
     }
 
@@ -88,7 +86,6 @@ abstract class MvvmFragment<V : ViewDataBinding?, VM : IMvvmBaseViewModel<*>?> :
     }
 
     override fun onDestroyView() {
-        BusUtils.unregister(this)
         super.onDestroyView()
     }
 

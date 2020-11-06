@@ -13,7 +13,6 @@ import androidx.databinding.ViewDataBinding;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.blankj.utilcode.util.BusUtils;
 import com.chenjim.andlibs.loadsir.EmptyCallback;
 import com.chenjim.andlibs.loadsir.ErrorCallback;
 import com.chenjim.andlibs.loadsir.LoadingCallback;
@@ -34,7 +33,6 @@ public abstract class MvvmActivity<V extends ViewDataBinding, VM extends IMvvmBa
         super.onCreate(savedInstanceState);
         initViewModel();
         performDataBinding();
-        BusUtils.register(this);
         initView();
     }
 
@@ -55,7 +53,6 @@ public abstract class MvvmActivity<V extends ViewDataBinding, VM extends IMvvmBa
         if (viewModel != null && viewModel.isUIAttached()) {
             viewModel.detachUI();
         }
-        BusUtils.unregister(this);
     }
 
     @Override

@@ -16,7 +16,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.blankj.utilcode.util.BusUtils;
 import com.chenjim.andlibs.R;
 import com.chenjim.andlibs.loadsir.EmptyCallback;
 import com.chenjim.andlibs.loadsir.ErrorCallback;
@@ -75,8 +74,6 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
 
         loadingDialog = new LoadingDialog(getActivity());
 
-        BusUtils.register(this);
-
         initView();
     }
 
@@ -121,7 +118,6 @@ public abstract class MvvmFragment<V extends ViewDataBinding, VM extends IMvvmBa
 
     @Override
     public void onDestroyView() {
-        BusUtils.unregister(this);
         super.onDestroyView();
     }
 

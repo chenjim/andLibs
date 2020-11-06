@@ -1,5 +1,6 @@
 package com.chenjim.andlibs.demo
 
+import android.util.Log
 import com.chenjim.andlibs.BaseApplication
 import com.chenjim.andlibs.loadsir.*
 import com.chenjim.andlibs.preference.SPUtil
@@ -26,7 +27,7 @@ class UserApp : BaseApplication() {
                 .addCallback(CustomCallback())
                 .setDefaultCallback(LoadingCallback::class.java) //设置默认状态页
                 .commit()
-        Logger.init(this, true, true)
+        Logger.init(this, Log.VERBOSE, true)
 
 //        CC.enableDebug(BuildConfig.DEBUG);
 //        CC.enableVerboseLog(BuildConfig.DEBUG);

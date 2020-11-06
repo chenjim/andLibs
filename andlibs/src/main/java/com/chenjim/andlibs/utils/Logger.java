@@ -1,24 +1,34 @@
 package com.chenjim.andlibs.utils;
 
 
-import android.app.Application;
+import android.content.Context;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.RandomAccessFile;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.List;
 
 /**
- * Created by chenjim on 2016/9/26.
- * 可以打印当前的线程名，所在代码中的位置等信息
+ * @author chenjim me@h89.cn
+ * @description 可以打印当前的线程名，所在代码中的位置等信息
  * modify from {@link "https://github.com/orhanobut/logger"}
+ * @date 2016/9/26.
  */
 public class Logger {
+    private Logger() {
+    }
+
     /**
      * Android's max limit for a log entry is ~4076 bytes,
      * so 4000 bytes is used as chunk size since default charset
@@ -30,63 +40,97 @@ public class Logger {
      * TAG is used for the Log, the name is a little different
      * in order to differentiate the logs easily with the filter
      */
-    private static String TAG = null;
+    private static final String TAG = null;
+
 
     /**
-     * true 输出日志
-     * false 不输出日志
+     * 日志输出级别
+     * {@link Log#ASSERT}>{@link Log#ERROR}>{@link Log#WARN}
+     * >{@link Log#INFO}>{@link Log#DEBUG}>{@link Log#VERBOSE}
      */
-    private static boolean isDebug = true;
+    private static int logLevel = Log.VERBOSE;
 
     /**
-     * 不对Loger进一步封装，为4
+     * 不进一步封装，为4
      * 若进一步封装，此值需要改变
      */
-    private static int stackIndex = 4;
+    private static final int STACK_INDEX = 4;
 
     /**
      * 单个文件限制大小
      */
-    private static final long MAX_FILE_LENGTH = 1 * 1024 * 1024;
+    private static long logFileMaxLen = 5 * 1024 * 1024L;
 
-    private static boolean isToFile = true;
+    private static File slogPath = null;
 
-    private static Application application;
+    private static final String CUR_LOG_NAME = "log1.txt";
+    private static final String LAST_LOG_NAME = "log2.txt";
 
-    private static SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+    private static Handler logHandler;
 
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    private static String curFileName = "log1.txt";
-    private static String lastFileName = "log2.txt";
+    /**
+     * 初始化，不是必须
+     * 当需要写入到日志文件时，必需
+     * 日志文件位置'/sdcard/Android/data/com.xxx.xxx/files/log/'
+     *
+     * @param writeFileContext 空，不写入日志
+     *                         非空，写入日志，用来获取应用的数据存储目录，
+     *                         不需要权限{@link Context#getExternalFilesDir(String)}
+     * @param level            默认值 {@link #logLevel}
+     */
+    public static void init(@Nullable Context writeFileContext, int level) {
+        if (writeFileContext != null) {
+            File path = new File(writeFileContext.getExternalFilesDir(null), "log");
+            if (!path.exists()) {
+                path.mkdirs();
+            }
+            slogPath = path;
 
-    private static LinkedBlockingQueue<String> cacheList = new LinkedBlockingQueue<>();
-    private static RandomAccessFile mLogRandomAccessFile;
-    private static LogWriteThread logWriteThread;
+            HandlerThread handlerThread = new HandlerThread("Logger");
+            handlerThread.start();
+            logHandler = new Handler(handlerThread.getLooper());
+            d("write log to dir:" + slogPath.getPath());
+        }
 
-    public static void init(Application app, boolean debug, boolean write) {
-        application = app;
-        isDebug = debug;
-        isToFile = write;
-        logWriteThread = new LogWriteThread();
-        logWriteThread.setName("Logger");
-        logWriteThread.start();
+        logLevel = level;
+    }
+
+    /**
+     * 配置日志输出级别，默认所有{@link #logLevel}
+     *
+     * @param level
+     */
+    public static void init(int level) {
+        init(null, level);
+    }
+
+    public static void setLogFileMaxLen(long len) {
+        logFileMaxLen = len;
     }
 
     public static void d() {
         log(Log.DEBUG, TAG, " ");
     }
 
-    public static void d(Object object) {
+    private static String objectToString(Object object) {
         String message;
         if (object == null) {
             message = "null";
         } else if (object.getClass().isArray()) {
             message = Arrays.deepToString((Object[]) object);
+        } else if (object instanceof List) {
+            Object[] objects = ((List<?>) object).toArray();
+            message = Arrays.deepToString(objects);
         } else {
             message = object.toString();
         }
-        log(Log.DEBUG, TAG, message);
+        return message;
+
+    }
+
+    public static void d(Object object) {
+        log(Log.DEBUG, TAG, objectToString(object));
     }
 
     public static void d(String tag, String message) {
@@ -95,15 +139,7 @@ public class Logger {
 
 
     public static void e(Object object) {
-        String message;
-        if (object == null) {
-            message = "null";
-        } else if (object.getClass().isArray()) {
-            message = Arrays.deepToString((Object[]) object);
-        } else {
-            message = object.toString();
-        }
-        log(Log.ERROR, TAG, message);
+        log(Log.ERROR, TAG, objectToString(object));
     }
 
     public static void e(String tag, String message) {
@@ -122,29 +158,12 @@ public class Logger {
     }
 
     public static void e(String tag, String message, Exception e) {
-
-        if (e != null && message != null) {
-            message += " : " + e.toString();
-        }
-        if (e != null && message == null) {
-            message = e.toString();
-        }
-        if (message == null) {
-            message = "No message/exception is set";
-        }
+        message += ":" + e.toString();
         log(Log.ERROR, tag, message);
     }
 
     public static void w(Object object) {
-        String message;
-        if (object == null) {
-            message = "null";
-        } else if (object.getClass().isArray()) {
-            message = Arrays.deepToString((Object[]) object);
-        } else {
-            message = object.toString();
-        }
-        log(Log.WARN, TAG, message);
+        log(Log.WARN, TAG, objectToString(object));
     }
 
     public static void w(String tag, String message) {
@@ -156,15 +175,7 @@ public class Logger {
     }
 
     public static void i(Object object) {
-        String message;
-        if (object == null) {
-            message = "null";
-        } else if (object.getClass().isArray()) {
-            message = Arrays.deepToString((Object[]) object);
-        } else {
-            message = object.toString();
-        }
-        log(Log.INFO, TAG, message);
+        log(Log.INFO, TAG, objectToString(object));
     }
 
     public static void i(String tag, String message) {
@@ -186,20 +197,27 @@ public class Logger {
     }
 
     private static void log(int logType, String tag, String message) {
-        if (!isDebug) {
+        if (logType < logLevel) {
             return;
         }
 
-        StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+        Thread curThread = Thread.currentThread();
+        StackTraceElement element = curThread.getStackTrace()[STACK_INDEX];
+        String threadName = curThread.getName();
 
-        StackTraceElement element = trace[stackIndex];
+        logHandler.post(() -> {
+            log(element, threadName, logType, tag, message);
+        });
+    }
 
+    private static void log(StackTraceElement element, String threadName,
+                            int logType, String tag, String message) {
         if (TextUtils.isEmpty(tag)) {
             tag = element.getFileName();
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append(Thread.currentThread().getName())
+        builder.append(threadName)
                 .append(",")
                 .append("(")
                 .append(element.getFileName())
@@ -210,7 +228,7 @@ public class Logger {
                 .append("():")
         ;
 
-        if (message == null) {
+        if (TextUtils.isEmpty(message)) {
             message = "null";
         }
 
@@ -228,24 +246,42 @@ public class Logger {
     }
 
 
+    /**
+     * @return 调用处的文件名+行数+函数名
+     */
+    public static String getStackTrace() {
+        StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+        StackTraceElement element = trace[3];
+        StringBuilder builder = new StringBuilder();
+        builder.append("(")
+                .append(element.getFileName())
+                .append(":")
+                .append(element.getLineNumber())
+                .append("),")
+                .append(element.getMethodName())
+                .append("()")
+        ;
+        return builder.toString();
+    }
+
     private static void logChunk(int logType, String tag, String chunk) {
         switch (logType) {
             case Log.ERROR:
                 Log.e(tag, chunk);
                 break;
+            case Log.WARN:
+                Log.w(tag, chunk);
+                break;
             case Log.INFO:
                 Log.i(tag, chunk);
+                break;
+            case Log.DEBUG:
+                Log.d(tag, chunk);
                 break;
             case Log.VERBOSE:
                 Log.v(tag, chunk);
                 break;
-            case Log.WARN:
-                Log.w(tag, chunk);
-                break;
-            case Log.DEBUG:
-                // Fall through, log debug by default
             default:
-                Log.d(tag, chunk);
                 break;
         }
         writeLogToFile(logType, tag, chunk);
@@ -257,191 +293,94 @@ public class Logger {
             case Log.ERROR:
                 type = "E";
                 break;
+            case Log.WARN:
+                type = "W";
+                break;
             case Log.INFO:
                 type = "I";
+                break;
+            case Log.DEBUG:
+                type = "D";
                 break;
             case Log.VERBOSE:
                 type = "V";
                 break;
-            case Log.WARN:
-                type = "W";
-                break;
             default:
-                type = "D";
                 break;
         }
         return type;
     }
 
 
-    private synchronized static void writeLogToFile(int logType, String tag, String msg) {
-        if (!isToFile) {
+    private static synchronized void writeLogToFile(int logType, String tag, String msg) {
+        if (slogPath == null) {
             return;
         }
-        if (application == null) {
-            throw new RuntimeException("Loger NOT init");
-        }
-        String data = new StringBuilder().append("[pid:").append(android.os.Process.myPid()).append("][")
-                .append(timeFormat.format(new Date())).append(": ")
-                .append(getTypeString(logType)).append("/")
-                .append(tag).append("]")
-                .append(msg).toString();
-        cacheList.offer(data);
-        Logger.class.notifyAll();
+        SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
+
+        String data = new StringBuilder()
+                .append("[pid:").append(android.os.Process.myPid())
+                .append("][").append(timeFormat.format(new Date())).append(": ")
+                .append(getTypeString(logType)).append("/").append(tag).append("]")
+                .append(msg).append("\r\n")
+                .toString();
+        logHandler.post(() -> doWriteDisk(data));
     }
 
     public static File getLogDir() {
-        String basePath = application.getFilesDir().getAbsolutePath();
-        File file = new File(basePath + File.separator + "log");
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        return file;
-    }
-
-    private static RandomAccessFile getRandomAccessFile() {
-        if (mLogRandomAccessFile == null) {
-            File file = new File(getLogDir(), curFileName);
-            try {
-                if (!file.exists()) {
-                    file.createNewFile();
-                }
-                mLogRandomAccessFile = new RandomAccessFile(file, "rw");
-                mLogRandomAccessFile.seek(mLogRandomAccessFile.length());
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-        return mLogRandomAccessFile;
+        return slogPath;
     }
 
     private static void doWriteDisk(String msg) {
-        try {
-            byte[] msgByte = msg.getBytes("UTF-8");
-            if (mLogRandomAccessFile != null
-                    && mLogRandomAccessFile.length() + msgByte.length > MAX_FILE_LENGTH) {
-                File file1 = new File(getLogDir(), curFileName);
-                File file2 = new File(getLogDir(), lastFileName);
-                file1.renameTo(file2);
-                //重命名后，重新创建文件
-                mLogRandomAccessFile = null;
-            }
+        File curFile = new File(getLogDir(), CUR_LOG_NAME);
+        File oldFile = new File(getLogDir(), LAST_LOG_NAME);
+        if (curFile.length() > logFileMaxLen && !curFile.renameTo(oldFile)) {
+            return;
+        }
 
-            if (getRandomAccessFile() == null) {
-                return;
-            }
-
-            mLogRandomAccessFile.write(msgByte);
-            mLogRandomAccessFile.writeBytes("\r\n");
-        } catch (Exception e) {
-            e.printStackTrace();
-            mLogRandomAccessFile = null;
+        try (FileWriter writer = new FileWriter(curFile, true)) {
+            writer.write(msg);
+            writer.flush();
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
     }
 
-    public static File zipLoggerFiles() {
-        try {
-            File logDir = getLogDir();
-            if (logDir != null && logDir.exists() && logDir.isDirectory()) {
-                File zipFile = new File(application.getFilesDir().getAbsolutePath() + File.separator + "log.zip");
-                if (zipFile.exists()) {
-                    zipFile.delete();
-                }
-                ArrayList<File> files = new ArrayList<>();
-
-                File firstLogFile = new File(logDir.getAbsolutePath() + File.separator + curFileName);
-                if (firstLogFile.exists()) {
-                    files.add(firstLogFile);
-                }
-
-                File secondLogFile = new File(logDir.getAbsolutePath() + File.separator + lastFileName);
-                if (secondLogFile.exists()) {
-                    files.add(secondLogFile);
-                }
-
-                String spFilePath = application.getFilesDir().getParent() + "/shared_prefs/common_data.xml";
-                File spFile = new File(spFilePath);
-                if (spFile != null && spFile.exists()) {
-                    files.add(spFile);
-//                    d("add spFile file to zipfile list");
-                }
-
-                FileUtils.zipFiles(files, zipFile, "");
-                return zipFile;
+    private static StringBuilder readLogFile(File file, long readLen) {
+        StringBuilder data = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            long skip = file.length() > readLen ? file.length() - readLen : 0;
+            reader.skip(skip);
+            long length = readLen > file.length() ? file.length() : readLen;
+            while (data.length() < length) {
+                data.append(reader.readLine()).append("\r\n");
             }
         } catch (Exception e) {
-            Log.d("zipFile error:", e.getMessage());
+            e.printStackTrace();
         }
-        return null;
+        return data;
     }
 
     /**
      * 读取最后一段logger
      */
     public static String getLastLogger(long maxSize) {
-        StringBuffer data = new StringBuffer();
-        RandomAccessFile curAccessFile = null, lastAccessFile = null;
-        try {
-            File curLogFile = new File(getLogDir() + File.separator + curFileName);
-            if (!curLogFile.exists()) {
-                return data.toString();
-            }
-            curAccessFile = new RandomAccessFile(curLogFile, "rw");
-            //是否需要读取上一个文件
-            if (curAccessFile.length() < maxSize) {
-                File lastLogFile = new File(getLogDir() + File.separator + lastFileName);
-                if (lastLogFile.exists()) {
-                    long lastFileReadSize = maxSize - curAccessFile.length();
-                    lastAccessFile = new RandomAccessFile(lastLogFile, "rw");
-                    lastAccessFile.seek(Math.max(0, lastAccessFile.length() - lastFileReadSize));
-                    while (lastAccessFile.getFilePointer() < lastAccessFile.length()) {
-                        data.append(lastAccessFile.readLine()).append("\r\n");
-                    }
-                }
-            }
-
-            curAccessFile.seek(Math.max(0, curAccessFile.length() - maxSize));
-            while (curAccessFile.getFilePointer() < curAccessFile.length()) {
-                data.append(curAccessFile.readLine()).append("\r\n");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (curAccessFile != null) {
-                    curAccessFile.close();
-                }
-                if (lastAccessFile != null) {
-                    lastAccessFile.close();
-                }
-            } catch (Exception e) {
-
-            }
+        StringBuilder data = new StringBuilder();
+        File curLogFile = new File(getLogDir(), CUR_LOG_NAME);
+        if (!curLogFile.exists()) {
+            return data.toString();
         }
+
+        //是否需要读取上一个文件
+        File lastLogFile = new File(getLogDir(), LAST_LOG_NAME);
+        if (curLogFile.length() < maxSize && lastLogFile.exists()) {
+            StringBuilder lastLogData = readLogFile(lastLogFile, maxSize - curLogFile.length());
+            data.append(lastLogData);
+        }
+
+        StringBuilder curLogData = readLogFile(curLogFile, maxSize);
+        data.append(curLogData);
         return data.toString();
-    }
-
-    private static class LogWriteThread extends Thread {
-        @Override
-        public void run() {
-
-            synchronized (Logger.class) {
-                while (true) {
-                    try {
-                        if (!cacheList.isEmpty()) {
-                            doWriteDisk(cacheList.take());
-                        } else {
-                            Logger.class.wait();
-                        }
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
-            }
-
-        }
     }
 
 }
