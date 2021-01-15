@@ -27,7 +27,7 @@ class UserApp : BaseApplication() {
                 .addCallback(CustomCallback())
                 .setDefaultCallback(LoadingCallback::class.java) //设置默认状态页
                 .commit()
-        Logger.init(this, Log.VERBOSE, true)
+        Logger.init(this, Log.VERBOSE)
 
 //        CC.enableDebug(BuildConfig.DEBUG);
 //        CC.enableVerboseLog(BuildConfig.DEBUG);

@@ -1,13 +1,15 @@
 package com.chenjim.andlibs.utils;
 
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -68,6 +70,11 @@ public class Logger {
 
     private static Handler logHandler;
 
+    static {
+        HandlerThread handlerThread = new HandlerThread("Logger");
+        handlerThread.start();
+        logHandler = new Handler(handlerThread.getLooper());
+    }
 
     /**
      * 初始化，不是必须
@@ -79,6 +86,7 @@ public class Logger {
      *                         不需要权限{@link Context#getExternalFilesDir(String)}
      * @param level            默认值 {@link #logLevel}
      */
+    @TargetApi(Build.VERSION_CODES.FROYO)
     public static void init(@Nullable Context writeFileContext, int level) {
         if (writeFileContext != null) {
             File path = new File(writeFileContext.getExternalFilesDir(null), "log");
@@ -86,10 +94,6 @@ public class Logger {
                 path.mkdirs();
             }
             slogPath = path;
-
-            HandlerThread handlerThread = new HandlerThread("Logger");
-            handlerThread.start();
-            logHandler = new Handler(handlerThread.getLooper());
             d("write log to dir:" + slogPath.getPath());
         }
 
@@ -372,8 +376,8 @@ public class Logger {
         }
 
         //是否需要读取上一个文件
-        File lastLogFile = new File(getLogDir(), LAST_LOG_NAME);
-        if (curLogFile.length() < maxSize && lastLogFile.exists()) {
+        if (curLogFile.length() < maxSize) {
+            File lastLogFile = new File(getLogDir(), LAST_LOG_NAME);
             StringBuilder lastLogData = readLogFile(lastLogFile, maxSize - curLogFile.length());
             data.append(lastLogData);
         }
