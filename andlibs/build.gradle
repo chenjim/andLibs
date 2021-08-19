@@ -5,6 +5,11 @@ plugins {
     id 'maven-publish'
 }
 
+task generateSourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier 'sources'
+}
+
 android {
     compileSdkVersion rootProject.compileSdkVersion
 
@@ -46,7 +51,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.chenjim'
                 artifactId = 'andlibs'
-                version = '0.0.1'
+                version = '0.0.4'
             }
         }
     }
